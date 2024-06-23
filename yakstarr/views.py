@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import DetailedDrug, DrugReview
 from .serializers import DetailedDrugSerializer, DrugReviewSerializer
 from django.db.models import Count
@@ -82,3 +83,31 @@ class DrugReviewDislikeView(generics.UpdateAPIView):
         review.dislikes += 1
         review.save()
         return Response({'dislikes': review.dislikes}, status=status.HTTP_200_OK)
+    
+class DrugReviewUpdateView(generics.UpdateAPIView):
+    queryset = DrugReview.objects.all()
+    serializer_class = DrugReviewSerializer
+
+    def patch(self, request, *args, **kwargs):
+        review = self.get_object()
+        password = request.data.get('password')
+        
+        if password is not None and review.password == password:
+            update_serializer = self.get_serializer(review, data=request.data, partial=True)
+            update_serializer.is_valid(raise_exception=True)
+            update_serializer.save()
+            return Response(update_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Invalid password.'}, status=status.HTTP_403_FORBIDDEN)
+
+class DrugReviewDeleteView(APIView):
+
+    def delete(self, request, *args, **kwargs):
+        review = generics.get_object_or_404(DrugReview, pk=kwargs['pk'])
+        password = request.data.get('password')
+
+        if password is not None and review.password == password:
+            review.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'detail': 'Invalid password.'}, status=status.HTTP_403_FORBIDDEN)
