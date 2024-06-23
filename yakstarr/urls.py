@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     DetailedDrugListView, 
+    DetailedDrugListByRatingView,
     DetailedDrugSearchView, 
     DetailedDrugCategoryView, 
     DetailedDrugDetailView, 
@@ -15,6 +16,7 @@ from .views import (
 
 urlpatterns = [
     path('drugs/', DetailedDrugListView.as_view(), name='drug-list'),
+    path('drugs/rating/', DetailedDrugListByRatingView.as_view(), name='drug-list-by-rating'),
     path('drugs/search/', DetailedDrugSearchView.as_view(), name='drug-search'),
     path('drugs/category/', DetailedDrugCategoryView.as_view(), name='drug-category'),
     path('drugs/<int:pk>/', DetailedDrugDetailView.as_view(), name='drug-detail'),

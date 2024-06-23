@@ -3,12 +3,20 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import DetailedDrug, DrugReview
 from .serializers import DetailedDrugSerializer, DrugReviewSerializer
-from django.db.models import Count
+from django.db.models import Count, Avg
 
 # 약 전체 목록 불러오기
 class DetailedDrugListView(generics.ListAPIView):
-    queryset = DetailedDrug.objects.all()
+    queryset = DetailedDrug.objects.all().order_by('-id')
     serializer_class = DetailedDrugSerializer
+
+# 약 별점 순으로 전체 목록 불러오기
+class DetailedDrugListByRatingView(generics.ListAPIView):
+    serializer_class = DetailedDrugSerializer
+
+    def get_queryset(self):
+        return DetailedDrug.objects.annotate(average_rating=Avg('drugreview__rating')).order_by('-average_rating')
+
 
 # 약 이름으로 검색하기
 class DetailedDrugSearchView(generics.ListAPIView):
